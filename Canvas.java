@@ -71,45 +71,46 @@ public class Canvas extends JPanel {
             @Override
             public void keyPressed(KeyEvent e){
                 // Translation.
-                if (e.getKeyChar() == 'w')
-                    for (Vertex vertex: vertices)
-                        vertex.moveDown();
-                if (e.getKeyChar() == 's')
-                    for (Vertex vertex: vertices)
-                        vertex.moveUp();
-                if (e.getKeyChar() == 'a')
-                    for (Vertex vertex: vertices)
-                        vertex.moveRight();
-                if (e.getKeyChar() == 'd')
-                    for (Vertex vertex: vertices)
-                        vertex.moveLeft();
-                if (e.getKeyChar() == 'q')
-                    for (Vertex vertex: vertices)
-                        vertex.moveIn();
-                if (e.getKeyChar() == 'e')
-                    for (Vertex vertex: vertices)
-                        vertex.moveOut();
+                if (e.getKeyChar() == 'w'){
+                   camera.moveUp(); 
+                }
+                if (e.getKeyChar() == 's'){
+                    camera.moveDown();
+                }
+                if (e.getKeyChar() == 'a'){
+                    camera.moveLeft();
+                }
+                if (e.getKeyChar() == 'd'){
+                    camera.moveRight();
+                }
+                if (e.getKeyChar() == 'q'){
+                    camera.moveIn();
+                }
+                if (e.getKeyChar() == 'e'){
+                    camera.moveDown();
+                }
+
                 // Rotation.
                 if (e.getKeyCode() == KeyEvent.VK_LEFT){
-                    for (Vertex vertex: vertices)
-                        vertex.zClockwise();
+                    camera.zClockwise();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_RIGHT){
-                    for (Vertex vertex: vertices)
-                        vertex.zAntiClockwise();
+                    camera.zAntiClockwise();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP){
-                    for (Vertex vertex: vertices)
-                        vertex.yClockwise();
+                    camera.yClockwise();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_DOWN){
-                    for (Vertex vertex: vertices)
-                        vertex.yAntiClockwise();
+                    camera.yAntiClockwise();
                 }
+                
                 // Update.
-                for (Vertex vertex: vertices)
-                    vertex.update();
+                for (Vertex vertex: vertices){
+                    vertex.update(camera);
+                }
                 repaint();
+                
+                camera.clearChanges();
             }
         });
     }
