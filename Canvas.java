@@ -7,6 +7,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 
@@ -14,14 +17,13 @@ public class Canvas extends JPanel {
     private ArrayList<Vertex> vertices = new ArrayList<>();
     private ArrayList<Edge> edges = new ArrayList<>();
     private double cx, cy;  // Center of the screen coordinates.
+    private Camera camera = new Camera(0,0,-10);
     
     public Canvas(int width, int height){
         setBackground(Color.WHITE);
         
         cx = width/2;
         cy = height/2;
-        
-        Camera camera = new Camera(0,0,-10);
         
         Vertex v1 = new Vertex( 1, 1, 1, cx, cy, camera);
         Vertex v2 = new Vertex( 1,-1, 1, cx, cy, camera);
@@ -71,55 +73,78 @@ public class Canvas extends JPanel {
             @Override
             public void keyPressed(KeyEvent e){
                 // Translation.
-                if (e.getKeyChar() == 'w'){
-                   camera.moveUp(); 
-                }
-                if (e.getKeyChar() == 's'){
-                    camera.moveDown();
-                }
-                if (e.getKeyChar() == 'a'){
-                    camera.moveLeft();
-                }
-                if (e.getKeyChar() == 'd'){
-                    camera.moveRight();
-                }
-                if (e.getKeyChar() == 'q'){
-                    camera.moveIn();
-                }
-                if (e.getKeyChar() == 'e'){
-                    camera.moveDown();
-                }
-
-                // Rotation.
-                if (e.getKeyCode() == KeyEvent.VK_LEFT){
-                    camera.zClockwise();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_RIGHT){
-                    camera.zAntiClockwise();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP){
-                    camera.yClockwise();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_DOWN){
-                    camera.yAntiClockwise();
-                }
+                if (e.getKeyChar() == 'w'){ camera.moveUp(); }
+                if (e.getKeyChar() == 's'){ camera.moveDown(); }
+                if (e.getKeyChar() == 'a'){ camera.moveLeft(); }
+                if (e.getKeyChar() == 'd'){ camera.moveRight(); }
+                if (e.getKeyChar() == 'q'){ camera.moveIn(); }
+                if (e.getKeyChar() == 'e'){ camera.moveOut(); }
                 
                 // Update.
-                for (Vertex vertex: vertices){
-                    vertex.update(camera);
-                }
+                for (Vertex vertex: vertices){ vertex.update(camera); }
                 repaint();
-                
                 camera.clearChanges();
             }
         });
-    }
+        
+        NewMouseListener mouseListener = new NewMouseListener();
+        addMouseListener(mouseListener);
+        addMouseMotionListener(mouseListener);
+        
+    } // Constructor ends.
     
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D)g;
-        for (Edge e: edges)
-            e.draw(g2);
+        for (Edge e: edges) { e.draw(g2); }
     }
-}
+    
+    class NewMouseListener implements MouseListener, MouseMotionListener {
+        double dragX = 0;
+        double dragY = 0;
+        double clickX = 0;
+        double clickY = 0;
+        
+        // This listener is not invoked.
+        @Override
+        public void mousePressed(MouseEvent e){
+            clickX = e.getX(); clickY = e.getY();
+            dragX = clickX; dragY = clickY;
+        }
+                
+        @Override
+        public void mouseDragged(MouseEvent e) {            
+            dragX = e.getX() - clickX;
+            dragY = e.getY() - clickY;
+            
+            // Rotation.
+            if (dragX > 0) { camera.setRotationSpeed(dragX); camera.yRotation(); }
+            else if (dragX < 0) { camera.setRotationSpeed(dragX); camera.yRotation();}
+            if (dragY > 0) { camera.setRotationSpeed(dragY); camera.xRotation(); }
+            else if (dragY < 0) { camera.setRotationSpeed(dragY); camera.xRotation(); }
+
+            // Update.
+            for (Vertex vertex : vertices) { vertex.update(camera); }
+            repaint();
+            camera.clearChanges();
+            
+            clickX = e.getX();
+            clickY = e.getY();
+        }
+        
+        @Override
+        public void mouseMoved(MouseEvent e){}
+        @Override
+        public void mouseClicked(MouseEvent e){}
+        @Override
+        public void mouseReleased(MouseEvent e){}
+        @Override
+        public void mouseExited(MouseEvent e){}
+        @Override
+        public void mouseEntered(MouseEvent e){}
+        
+    } // NewMouseListener class ends
+    
+} // Canvas class ends
+
